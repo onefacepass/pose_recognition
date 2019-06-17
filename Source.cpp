@@ -4,22 +4,8 @@ int main(int argc, char *argv[])
 {
 	PoseDete poseDete;
 	poseDete.Init();
-
-	cv::VideoCapture cap(0);
-	if (!cap.isOpened()) {
-		return -1;
-	}
-	cv::Mat frame;
-	std::vector<Pose2d> poseRes;
-
-	while (cap.isOpened()) {
-		cap >> frame;
-		poseDete.DetePose(frame, poseRes);
-		poseDete.DrawPoint(frame, poseRes);
-
-		cv::imshow("test", frame);
-		cv::waitKey(33);
-		poseRes.clear();
-	}
+//	poseDete.detec_real_time_camera();
+//	poseDete.detec_vedio("C:\\Users\\有对象真好\\Desktop\\openpose\\examples\\media\\video.avi");
+	poseDete.detec_images("C:\\Users\\有对象真好\\Desktop\\openpose\\examples\\media");
 	return 0;
 }

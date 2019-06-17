@@ -159,3 +159,74 @@ void PoseDete::configureWrapper(op::Wrapper& opWrapper)
 		op::error(e.what(), __LINE__, __FUNCTION__, __FILE__);
 	}
 }
+
+void PoseDete::detec_images(string imagepath)
+{
+	// Read frames on directory
+	const auto imagePaths = op::getFilesOnDirectory(imagepath, op::Extensions::Images);
+
+	cv::Mat frame;
+	std::vector<Pose2d> poseRes;
+
+	// Process and display images
+	for (const auto& imagePath : imagePaths)
+	{
+		auto imageToProcess = cv::imread(imagePath);
+		auto datumProcessed = opWrapper.emplaceAndPop(imageToProcess);
+		if (datumProcessed != nullptr)
+		{
+			printKeypoints(datumProcessed, poseRes);
+			DrawPoint(imageToProcess, poseRes);
+
+			cv::imshow("test", imageToProcess);
+			cv::waitKey(33);
+			poseRes.clear();
+		}
+		else
+			op::log("Image could not be processed.", op::Priority::High);
+	}
+
+}
+
+void PoseDete::detec_vedio(string vediopath)
+{
+	cv::VideoCapture cap;
+    cap.open(vediopath); //打开视频,以上两句等价于VideoCapture cap("E://2.avi");
+
+	if (!cap.isOpened()) {
+		return;
+	}
+	cv::Mat frame;
+	std::vector<Pose2d> poseRes;
+
+	while (cap.isOpened()) {
+		cap >> frame;
+		DetePose(frame, poseRes);
+		DrawPoint(frame, poseRes);
+
+		cv::imshow("test", frame);
+		cv::waitKey(33);
+		poseRes.clear();
+	}
+}
+
+void PoseDete::detec_real_time_camera()
+{
+	cv::VideoCapture cap(0);
+	if (!cap.isOpened()) {
+		return;
+	}
+	cv::Mat frame;
+	std::vector<Pose2d> poseRes;
+
+	while (cap.isOpened()) {
+		cap >> frame;
+		DetePose(frame, poseRes);
+		DrawPoint(frame, poseRes);
+
+		cv::imshow("test", frame);
+		cv::waitKey(33);
+		poseRes.clear();
+	}
+}
+
