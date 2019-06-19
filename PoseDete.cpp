@@ -49,21 +49,26 @@ void PoseDete::DrawPoint(cv::Mat & image, std::vector<Pose2d>& poseKeypoints) {
 		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 1]))/*当两个点都存在时,画出之间的连线*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), cv::Point2d(poseKeypoints[i + 1].x, poseKeypoints[i + 1].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
-			//0-14
-		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 14]))/*当两个点都存在时,画出之间的连线*/ {
-			cv::line(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Scalar(0, 255, 255), 3, 8, 0);
-		}
+		
 			//0-15
 		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 15]))/*当两个点都存在时,画出之间的连线*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), cv::Point2d(poseKeypoints[i + 15].x, poseKeypoints[i + 15].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
-			//14-16
-		if (!Pose2dIsEmpty(poseKeypoints[i+14]) && !Pose2dIsEmpty(poseKeypoints[i + 16]))/*当两个点都存在时,画出之间的连线*/ {
-			cv::line(image, cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Point2d(poseKeypoints[i + 16].x, poseKeypoints[i + 16].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		//0-16
+		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 15]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), cv::Point2d(poseKeypoints[i + 16].x, poseKeypoints[i + 16].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+			//14-13
+		if (!Pose2dIsEmpty(poseKeypoints[i+14]) && !Pose2dIsEmpty(poseKeypoints[i + 13]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Point2d(poseKeypoints[i + 13].x, poseKeypoints[i + 13].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//15-17
 		if (!Pose2dIsEmpty(poseKeypoints[i+15]) && !Pose2dIsEmpty(poseKeypoints[i + 17]))/*当两个点都存在时,画出之间的连线*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 15].x, poseKeypoints[i + 15].y), cv::Point2d(poseKeypoints[i + 17].x, poseKeypoints[i + 17].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//16-18
+		if (!Pose2dIsEmpty(poseKeypoints[i + 16]) && !Pose2dIsEmpty(poseKeypoints[i + 18]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 16].x, poseKeypoints[i + 16].y), cv::Point2d(poseKeypoints[i + 18].x, poseKeypoints[i + 18].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//1-2
 		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 2]))/*当两个点都存在时,画出之间的连线*/ {
@@ -93,31 +98,63 @@ void PoseDete::DrawPoint(cv::Mat & image, std::vector<Pose2d>& poseKeypoints) {
 		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 8]))/*当两个点都存在时,画出之间的连线*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 1].x, poseKeypoints[i + 1].y), cv::Point2d(poseKeypoints[i + 8].x, poseKeypoints[i + 8].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
-			//1-11
-		if (!Pose2dIsEmpty(poseKeypoints[i + 1]) && !Pose2dIsEmpty(poseKeypoints[i + 11]))/*当两个点都存在时,画出之间的连线*/ {
-			cv::line(image, cv::Point2d(poseKeypoints[i + 1].x, poseKeypoints[i + 1].y), cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+			//10-11
+		if (!Pose2dIsEmpty(poseKeypoints[i + 10]) && !Pose2dIsEmpty(poseKeypoints[i + 11]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 10].x, poseKeypoints[i + 10].y), cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//8-9
 		if (!Pose2dIsEmpty(poseKeypoints[i+8]) && !Pose2dIsEmpty(poseKeypoints[i + 9]))/*当两个点都存在时,画出之间的连线*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 8].x, poseKeypoints[i + 8].y), cv::Point2d(poseKeypoints[i + 9].x, poseKeypoints[i + 9].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
+		//8-12
+		if (!Pose2dIsEmpty(poseKeypoints[i + 8]) && !Pose2dIsEmpty(poseKeypoints[i + 12]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 8].x, poseKeypoints[i + 8].y), cv::Point2d(poseKeypoints[i + 12].x, poseKeypoints[i + 12].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
 			//9-10
 		if (!Pose2dIsEmpty(poseKeypoints[i+9]) && !Pose2dIsEmpty(poseKeypoints[i + 10]))/*当两个点都存在时,画出之间的连线*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 9].x, poseKeypoints[i + 9].y), cv::Point2d(poseKeypoints[i + 10].x, poseKeypoints[i + 10].y), cv::Scalar(0, 255, 255), 3, 8, 0);
-		}
-			//11-12
-		if (!Pose2dIsEmpty(poseKeypoints[i+11]) && !Pose2dIsEmpty(poseKeypoints[i + 12]))/*当两个点都存在时,画出之间的连线*/ {
-			cv::line(image, cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Point2d(poseKeypoints[i + 12].x, poseKeypoints[i + 12].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//12-13
 		if (!Pose2dIsEmpty(poseKeypoints[i+12]) && !Pose2dIsEmpty(poseKeypoints[i + 13]))/*当两个点都存在时,画出之间的连线*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 12].x, poseKeypoints[i + 12].y), cv::Point2d(poseKeypoints[i + 13].x, poseKeypoints[i + 13].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
-		
 
-
+	    //左脚
+		//14-21
+		if (!Pose2dIsEmpty(poseKeypoints[i + 14]) && !Pose2dIsEmpty(poseKeypoints[i + 21]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Point2d(poseKeypoints[i + 21].x, poseKeypoints[i + 21].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//21-19
+		if (!Pose2dIsEmpty(poseKeypoints[i + 19]) && !Pose2dIsEmpty(poseKeypoints[i + 21]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 19].x, poseKeypoints[i + 19].y), cv::Point2d(poseKeypoints[i + 21].x, poseKeypoints[i + 21].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//19-20
+		if (!Pose2dIsEmpty(poseKeypoints[i + 19]) && !Pose2dIsEmpty(poseKeypoints[i + 20]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 19].x, poseKeypoints[i + 19].y), cv::Point2d(poseKeypoints[i + 20].x, poseKeypoints[i + 20].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//20-14
+		if (!Pose2dIsEmpty(poseKeypoints[i + 14]) && !Pose2dIsEmpty(poseKeypoints[i + 20]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Point2d(poseKeypoints[i + 20].x, poseKeypoints[i + 20].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//右脚
+		//11-23
+		if (!Pose2dIsEmpty(poseKeypoints[i + 11]) && !Pose2dIsEmpty(poseKeypoints[i + 23]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Point2d(poseKeypoints[i + 23].x, poseKeypoints[i + 23].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//23-22
+		if (!Pose2dIsEmpty(poseKeypoints[i + 22]) && !Pose2dIsEmpty(poseKeypoints[i + 23]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 22].x, poseKeypoints[i + 22].y), cv::Point2d(poseKeypoints[i + 23].x, poseKeypoints[i + 23].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//22-24
+		if (!Pose2dIsEmpty(poseKeypoints[i + 22]) && !Pose2dIsEmpty(poseKeypoints[i + 24]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 22].x, poseKeypoints[i + 22].y), cv::Point2d(poseKeypoints[i + 24].x, poseKeypoints[i + 24].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
+		//24-11
+		if (!Pose2dIsEmpty(poseKeypoints[i + 11]) && !Pose2dIsEmpty(poseKeypoints[i + 24]))/*当两个点都存在时,画出之间的连线*/ {
+			cv::line(image, cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Point2d(poseKeypoints[i + 24].x, poseKeypoints[i + 24].y), cv::Scalar(0, 255, 255), 3, 8, 0);
+		}
 	}
-	
+	showPointIndexInImage(image, poseKeypoints);
 }
 
 bool PoseDete::Pose2dIsEmpty(Pose2d poseKeypoint)
@@ -249,12 +286,41 @@ void PoseDete::configureWrapper(op::Wrapper& opWrapper)
 	}
 }
 
+void PoseDete::showPointIndexInImage(cv::Mat & image, std::vector<Pose2d>& poseKeypoints)
+{
+	for (size_t i = 0; i < poseKeypoints.size(); ++i) {
+		cv::putText(image,std::to_string(i%25), cv::Point2f(poseKeypoints[i].x, poseKeypoints[i].y), cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
+	}
+}
+
+void PoseDete::detec_image(string imagepath)
+{
+	std::vector<Pose2d> poseRes;
+
+	cv::Mat imageToProcess = cv::imread(imagepath);
+	
+	if (!imageToProcess.empty())
+	{
+		auto datumProcessed = opWrapper.emplaceAndPop(imageToProcess);
+		if (datumProcessed != nullptr)
+		{
+			transKeypoints(datumProcessed, poseRes);
+			DrawPoint(imageToProcess, poseRes);
+
+			cv::imshow("test", imageToProcess); 
+			cv::waitKey(3300000);
+			poseRes.clear();
+		}
+
+	}
+	
+}
+
 void PoseDete::detec_images(string imagepath)
 {
 	// Read frames on directory
 	const auto imagePaths = op::getFilesOnDirectory(imagepath, op::Extensions::Images);
 
-	cv::Mat frame;
 	std::vector<Pose2d> poseRes;
 
 	// Process and display images
