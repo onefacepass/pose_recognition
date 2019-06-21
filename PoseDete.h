@@ -26,14 +26,16 @@ public:
 	void get_face_scope();//获得脸部位置轮廓
 
 	bool panduantaishou(std::vector<Pose2d>& poseKeypoints);//判断抬手动作
+    
+	void showPointIndexInImage(cv::Mat & image, std::vector<Pose2d>& poseKeypoints);//在图像上标注坐标的序号
 
-	void detec_image(string imagepath);
+	void detec_image(string imagepath);//探测单张图像骨骼信息
 
-	void detec_images(string imagepath);
+	void detec_images(string imagepath);//探测文件夹下多个图像骨骼信息
 
-	void detec_vedio(string vediopath);
+	void detec_vedio(string vediopath);//探测视频骨骼信息
 
-	void detec_real_time_camera();
+	void detec_real_time_camera();//探测骨骼信息
 private:
 	op::Wrapper opWrapper{ op::ThreadManagerMode::Asynchronous };
 

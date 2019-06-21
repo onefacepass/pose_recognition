@@ -1,11 +1,12 @@
-#include "PoseDete.h"
+ï»¿#include "PoseDete.h"
 
 int main(int argc, char *argv[])
 {
 	PoseDete poseDete;
 	poseDete.Init();
 //	poseDete.detec_real_time_camera();
-//	poseDete.detec_vedio("C:\\Users\\ÓÐ¶ÔÏóÕæºÃ\\Desktop\\openpose\\examples\\media\\video.avi");
-	poseDete.detec_images("C:\\Users\\ÓÐ¶ÔÏóÕæºÃ\\Desktop\\openpose\\examples\\media");
+//	poseDete.detec_vedio("C:\\Users\\æœ‰å¯¹è±¡çœŸå¥½\\Desktop\\openpose\\examples\\media\\video.avi");
+//	poseDete.detec_images("C:\\Users\\æœ‰å¯¹è±¡çœŸå¥½\\Desktop\\openpose\\examples\\media");
+	poseDete.detec_image("C:\\Users\\æœ‰å¯¹è±¡çœŸå¥½\\Desktop\\imagedir\\00002.jpg");
 	return 0;
 }
