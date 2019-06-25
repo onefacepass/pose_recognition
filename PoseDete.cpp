@@ -5,7 +5,6 @@ PoseDete::PoseDete()
 {
 }
 
-
 PoseDete::~PoseDete()
 {
 }
@@ -165,6 +164,42 @@ bool PoseDete::Pose2dIsEmpty(Pose2d poseKeypoint)
 		return false;
 	
 }
+void PoseDete::get_face_scope(cv::Mat & image, std::vector<Pose2d>& poseKeypoints,std::vector<Pose2d>& head_scope)
+{
+	if (int i = panduantaishou(image,poseKeypoints) != -1)
+	{
+
+       //将17右眼,鼻子0，左眼18，脖子1四个点存入head_scope里
+		if (Pose2dIsEmpty(poseKeypoints[i + 13]))//17=4(i)+13
+			head_scope.push_back(poseKeypoints[i + 13]);
+		if (Pose2dIsEmpty(poseKeypoints[i - 4 ]))//0=4(i)-4
+			head_scope.push_back(poseKeypoints[i - 4]);
+		if (Pose2dIsEmpty(poseKeypoints[i + 14]))//18=4(i)+13
+			head_scope.push_back(poseKeypoints[i + 14]);
+		if (Pose2dIsEmpty(poseKeypoints[i - 3]))//1=4(i)-3
+			head_scope.push_back(poseKeypoints[i - 3]);
+	}
+}
+int PoseDete::panduantaishou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints)//判断4号点位于某个区域
+{
+	//testing start 画出指定区域
+	cv::rectangle(image, cv::Point2f(20, 200), cv::Point2f(200, 300), cv::Scalar(255, 0, 0), 1, 1, 0);
+	//testing end
+	for (size_t i = 4; i < poseKeypoints.size(); i += 25)//遍历图像中所有的人
+	{
+		if (Pose2dIsEmpty(poseKeypoints[i]))//4号点存在
+		{
+			if ((poseKeypoints[i].x >= 20 && poseKeypoints[i].x <= 200)&&(poseKeypoints[i].y >= 200 && poseKeypoints[i].y <= 300))//判断4号点位于指定区域
+			{
+				return i;//4号点位于指定区域
+			}
+			else if ( (poseKeypoints.size() - i) < 25 )
+			{
+				return -1;//寻遍数组，所有人都没抬手
+			}
+		}
+	}
+}
 /*将datumsPtr中的点转存到poseKeypoints*/
 void PoseDete::transKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr, std::vector<Pose2d>& poseKeypoints)
 {
@@ -188,6 +223,12 @@ void PoseDete::transKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<
 			cout <<"mVolume="<< datumsPtr->at(0)->poseKeypoints.getVolume() << endl;
 			cout << "NumberDimensions=" << datumsPtr->at(0)->poseKeypoints.getNumberDimensions()<< endl;
 			datumsPtr->at(0)->poseKeypoints.show();
+			cout << "DatumID:" << datumsPtr->at(0)->id << endl;//程序运行期间一直递增 可以理解为帧数（每帧对应一个Datum）
+			cout << "DatumsubId:" << datumsPtr->at(0)->subId << endl;
+			cout << "DatumsubIdMax:" << datumsPtr->at(0)->subIdMax << endl;
+			cv::imshow("Datum storage 3dMat output:", datumsPtr->at(0)->cvInputData);//存储输入图像的Mat
+			cv::imshow("Datum storage Mat output:", datumsPtr->at(0)->cvOutputData);//存储带有骨骼连线的Mat
+            
 		}
 		else
 			op::log("Nullptr or empty datumsPtr found.", op::Priority::High);
@@ -289,7 +330,7 @@ void PoseDete::configureWrapper(op::Wrapper& opWrapper)
 void PoseDete::showPointIndexInImage(cv::Mat & image, std::vector<Pose2d>& poseKeypoints)
 {
 	for (size_t i = 0; i < poseKeypoints.size(); ++i) {
-		cv::putText(image,std::to_string(i%25), cv::Point2f(poseKeypoints[i].x, poseKeypoints[i].y), cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
+		cv::putText(image,std::to_string(i%25)+":("+ std::to_string(poseKeypoints[i].x)+","+std::to_string(poseKeypoints[i].y)+")", cv::Point2f(poseKeypoints[i].x, poseKeypoints[i].y), cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
 	}
 }
 

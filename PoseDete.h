@@ -23,9 +23,9 @@ public:
 
 	bool Pose2dIsEmpty(Pose2d poseKeypoint);//判断坐标是否为空
 
-	void get_face_scope();//获得脸部位置轮廓
+	void get_face_scope(cv::Mat & image, std::vector<Pose2d>& poseKeypoints,std::vector<Pose2d>& head_scope);//获得脸部位置轮廓  将17右眼,鼻子0，左眼18，脖子1四个点存入head_scope里
 
-	bool panduantaishou(std::vector<Pose2d>& poseKeypoints);//判断抬手动作
+	int panduantaishou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints);//判断抬手动作 返回4号点在数组中下标
     
 	void showPointIndexInImage(cv::Mat & image, std::vector<Pose2d>& poseKeypoints);//在图像上标注坐标的序号
 
@@ -35,7 +35,7 @@ public:
 
 	void detec_vedio(string vediopath);//探测视频骨骼信息
 
-	void detec_real_time_camera();//探测骨骼信息
+	void detec_real_time_camera();//探测摄像头实时骨骼信息
 private:
 	op::Wrapper opWrapper{ op::ThreadManagerMode::Asynchronous };
 
