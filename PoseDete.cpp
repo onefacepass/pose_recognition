@@ -1,6 +1,5 @@
 #include "PoseDete.h"
 #include <openpose/flags.hpp>
-
 PoseDete::PoseDete()
 {
 }
@@ -8,8 +7,12 @@ PoseDete::PoseDete()
 PoseDete::~PoseDete()
 {
 }
-
 void PoseDete::Init() {
+	//四号点判断范围的初始化
+	temp.leftup = cv::Point2f(10, 50);
+	temp.rightdown = cv::Point2f(200, 200);
+
+
 	op::log("Starting OpenPose demo...", op::Priority::High);
 	// Configuring OpenPose
 	op::log("Configuring OpenPose...", op::Priority::High);
@@ -20,22 +23,27 @@ void PoseDete::Init() {
 	opWrapper.start();
 }
 
-int PoseDete::DetePose(cv::Mat &frame, std::vector<Pose2d>& poseKeypoints) {
-	try
+int PoseDete::GetFace(cv::Mat &frame, std::vector<float> &facescope, bool &facescopeIsEmpty) {//探测单张图像 返回脸部轮廓
+	std::vector<Pose2d> poseRes;
+
+	DetePose(frame, poseRes);
+	DrawPoint(frame, poseRes);
+	//ShowZuoBiao(poseRes);
+	int zuobiao4_id = panduantaishou(frame, poseRes);
+	//std::cout << "zuobiao4_id" << zuobiao4_id<<"size:"<< poseRes.size() << std::endl;
+	  //赋值数组
+	if (zuobiao4_id != -1)
 	{
-		auto datumProcessed = opWrapper.emplaceAndPop(frame);
-		if (datumProcessed != nullptr)
-		{
-			transKeypoints(datumProcessed, poseKeypoints);
-		}
-		else
-			op::log("Image could not be processed.", op::Priority::High);
-		return 0;
+		facescopeIsEmpty = false;//数组非空
+		get_face_scope(zuobiao4_id, poseRes, facescope);
 	}
-	catch (const std::exception& e)
+	else
 	{
-		return -1;
+		facescopeIsEmpty = true;//数组空
 	}
+
+	poseRes.clear();//清空数组
+	return 0;
 }
 
 void PoseDete::DrawPoint(cv::Mat & image, std::vector<Pose2d>& poseKeypoints) {
@@ -164,39 +172,45 @@ bool PoseDete::Pose2dIsEmpty(Pose2d poseKeypoint)
 		return false;
 	
 }
-void PoseDete::get_face_scope(cv::Mat & image, std::vector<Pose2d>& poseKeypoints,std::vector<Pose2d>& head_scope)
+void PoseDete::get_face_scope(int zuobiao4_id, std::vector<Pose2d>& poseKeypoints, std::vector<float> &facescope)
 {
-	if (int i = panduantaishou(image,poseKeypoints) != -1)
+	
+	if (!Pose2dIsEmpty(poseKeypoints[zuobiao4_id + 13]) && !Pose2dIsEmpty(poseKeypoints[zuobiao4_id - 3]) && !Pose2dIsEmpty(poseKeypoints[zuobiao4_id + 14]))
 	{
+		
+		facescope.push_back(poseKeypoints[zuobiao4_id + 13].x);
+		facescope.push_back(poseKeypoints[zuobiao4_id + 14].x);
+		facescope.push_back(2 * poseKeypoints[zuobiao4_id + 13].y - poseKeypoints[zuobiao4_id - 3].y);
+		facescope.push_back(2 * poseKeypoints[zuobiao4_id + 14].y - poseKeypoints[zuobiao4_id - 3].y);
 
-       //将17右眼,鼻子0，左眼18，脖子1四个点存入head_scope里
-		if (Pose2dIsEmpty(poseKeypoints[i + 13]))//17=4(i)+13
-			head_scope.push_back(poseKeypoints[i + 13]);
-		if (Pose2dIsEmpty(poseKeypoints[i - 4 ]))//0=4(i)-4
-			head_scope.push_back(poseKeypoints[i - 4]);
-		if (Pose2dIsEmpty(poseKeypoints[i + 14]))//18=4(i)+13
-			head_scope.push_back(poseKeypoints[i + 14]);
-		if (Pose2dIsEmpty(poseKeypoints[i - 3]))//1=4(i)-3
-			head_scope.push_back(poseKeypoints[i - 3]);
+		////show
+		int index = 0;
+		for each (auto& var in facescope)
+		{
+			std::cout <<"index :"<<index<< "facescope"<<var << std::endl;
+			index = index + 1;
+		}
+	
 	}
 }
-int PoseDete::panduantaishou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints)//判断4号点位于某个区域
+int PoseDete::panduantaishou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints)//判断4号点位于某个区域 返回4号点下标
 {
+	
 	//testing start 画出指定区域
-	cv::rectangle(image, cv::Point2f(20, 200), cv::Point2f(200, 300), cv::Scalar(255, 0, 0), 1, 1, 0);
+	cv::rectangle(image, temp.leftup,temp.rightdown, cv::Scalar(255, 0, 0), 1, 1, 0);
 	//testing end
-	for (size_t i = 4; i < poseKeypoints.size(); i += 25)//遍历图像中所有的人
+	for (int i = 4; i < poseKeypoints.size(); i = i + 25)//遍历图像中所有的人
 	{
-		if (Pose2dIsEmpty(poseKeypoints[i]))//4号点存在
+		if (!Pose2dIsEmpty(poseKeypoints[i]))//4号点存在
 		{
-			if ((poseKeypoints[i].x >= 20 && poseKeypoints[i].x <= 200)&&(poseKeypoints[i].y >= 200 && poseKeypoints[i].y <= 300))//判断4号点位于指定区域
+			if (!InScope(poseKeypoints[i]))//判断4号点位于指定区域
 			{
 				return i;//4号点位于指定区域
 			}
-			else if ( (poseKeypoints.size() - i) < 25 )
-			{
-				return -1;//寻遍数组，所有人都没抬手
-			}
+		}
+		else if ((25 + i) > poseKeypoints.size())
+		{
+			return -1;//寻遍数组，所有人都没抬手
 		}
 	}
 }
@@ -220,15 +234,14 @@ void PoseDete::transKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<
 			}
 			/*输出坐标点相关信息*/
 			/*testing*/
-			cout <<"mVolume="<< datumsPtr->at(0)->poseKeypoints.getVolume() << endl;
-			cout << "NumberDimensions=" << datumsPtr->at(0)->poseKeypoints.getNumberDimensions()<< endl;
-			datumsPtr->at(0)->poseKeypoints.show();
-			cout << "DatumID:" << datumsPtr->at(0)->id << endl;//程序运行期间一直递增 可以理解为帧数（每帧对应一个Datum）
-			cout << "DatumsubId:" << datumsPtr->at(0)->subId << endl;
-			cout << "DatumsubIdMax:" << datumsPtr->at(0)->subIdMax << endl;
-			cv::imshow("Datum storage 3dMat output:", datumsPtr->at(0)->cvInputData);//存储输入图像的Mat
-			cv::imshow("Datum storage Mat output:", datumsPtr->at(0)->cvOutputData);//存储带有骨骼连线的Mat
-            
+			//std::cout <<"mVolume="<< datumsPtr->at(0)->poseKeypoints.getVolume() << std::endl;
+			//std::cout << "NumberDimensions=" << datumsPtr->at(0)->poseKeypoints.getNumberDimensions()<< std::endl;
+			//std::cout << "DatumID:" << datumsPtr->at(0)->id << std::endl;//程序运行期间一直递增 可以理解为帧数（每帧对应一个Datum）
+			//std::cout << "DatumsubId:" << datumsPtr->at(0)->subId << std::endl;
+			//std::cout << "DatumsubIdMax:" << datumsPtr->at(0)->subIdMax << std::endl;
+			//cv::imshow("Datum storage 3dMat output:", datumsPtr->at(0)->cvInputData);//存储输入图像的Mat
+			//cv::imshow("Datum storage Mat output:", datumsPtr->at(0)->cvOutputData);//存储带有骨骼连线的Mat
+			//panduantaishou(datumsPtr->at(0)->cvInputData, poseKeypoints);
 		}
 		else
 			op::log("Nullptr or empty datumsPtr found.", op::Priority::High);
@@ -247,7 +260,8 @@ void PoseDete::configureWrapper(op::Wrapper& opWrapper)
 		// Configuring OpenPose
 
 		// logging_level
-		op::check(0 <= FLAGS_logging_level && FLAGS_logging_level <= 255, "Wrong logging_level value.",
+	
+		op::check(0 <=  FLAGS_logging_level &&  FLAGS_logging_level <= 255, "Wrong logging_level value.",
 			__LINE__, __FUNCTION__, __FILE__);
 		op::ConfigureLog::setPriorityThreshold((op::Priority)FLAGS_logging_level);
 		op::Profiler::setDefaultX(FLAGS_profile_speed);
@@ -334,7 +348,7 @@ void PoseDete::showPointIndexInImage(cv::Mat & image, std::vector<Pose2d>& poseK
 	}
 }
 
-void PoseDete::detec_image(string imagepath)
+void PoseDete::detec_image(std::string imagepath)
 {
 	std::vector<Pose2d> poseRes;
 
@@ -357,7 +371,7 @@ void PoseDete::detec_image(string imagepath)
 	
 }
 
-void PoseDete::detec_images(string imagepath)
+void PoseDete::detec_images(std::string imagepath)
 {
 	// Read frames on directory
 	const auto imagePaths = op::getFilesOnDirectory(imagepath, op::Extensions::Images);
@@ -384,7 +398,7 @@ void PoseDete::detec_images(string imagepath)
 
 }
 
-void PoseDete::detec_vedio(string vediopath)
+void PoseDete::detec_vedio(std::string vediopath)
 {
 	cv::VideoCapture cap;
     cap.open(vediopath); //打开视频,以上两句等价于VideoCapture cap("E://2.avi");
@@ -429,3 +443,47 @@ void PoseDete::detec_real_time_camera()
 	}
 }
 
+void PoseDete::SetElbow4PointScope(cv::Point2f leftup, cv::Point2f rightdown)
+{
+	temp.leftup = leftup;
+	temp.rightdown = rightdown;
+}
+
+int PoseDete::DetePose(cv::Mat &frame, std::vector<Pose2d>& poseKeypoints) {
+	try
+	{
+		auto datumProcessed = opWrapper.emplaceAndPop(frame);
+		if (datumProcessed != nullptr)
+		{
+			transKeypoints(datumProcessed, poseKeypoints);
+		}
+		else
+			op::log("Image could not be processed.", op::Priority::High);
+		return 0;
+	}
+	catch (const std::exception& e)
+	{
+		return -1;
+	}
+}
+
+void PoseDete::ShowZuoBiao(std::vector<Pose2d> poseKeypoints)
+{
+	int index = 0;
+	for each (auto& var in poseKeypoints)
+	{
+		std::cout <<"index:"<<index <<"x = "<<var.x << ";y = "<<var.y << std::endl;
+		index = index + 1;
+	}
+}
+
+bool PoseDete::InScope(Pose2d Point)
+{
+	if ((Point.x >= temp.leftup.x && Point.x <= temp.rightdown.x) && (Point.y >= temp.rightdown.y && Point.y <= temp.leftup.y))
+	{
+		return true;
+	}
+	else
+		return false;
+	
+}
