@@ -1,4 +1,4 @@
-#include "PoseDete.h"
+ï»¿#include "PoseDete.h"
 #include <openpose/flags.hpp>
 PoseDete::PoseDete()
 {
@@ -8,7 +8,7 @@ PoseDete::~PoseDete()
 {
 }
 void PoseDete::Init() {
-	//ËÄºÅµãÅĞ¶Ï·¶Î§µÄ³õÊ¼»¯
+	//Ã‹Ã„ÂºÃ…ÂµÃ£Ã…ÃÂ¶ÃÂ·Â¶ÃÂ§ÂµÃ„Â³ÃµÃŠÂ¼Â»Â¯
 	temp.leftup = cv::Point2f(10, 50);
 	temp.rightdown = cv::Point2f(100, 200);
 	
@@ -22,7 +22,7 @@ void PoseDete::Init() {
 	opWrapper.start();
 }
 
-int PoseDete::GetFace(cv::Mat &frame, std::vector<float> &facescope, bool &facescopeIsEmpty) {//Ì½²âµ¥ÕÅÍ¼Ïñ ·µ»ØÁ³²¿ÂÖÀª
+int PoseDete::GetFace(cv::Mat& frame, std::vector<float> &facescope, bool &facescopeIsEmpty) {//ÃŒÂ½Â²Ã¢ÂµÂ¥Ã•Ã…ÃÂ¼ÃÃ± Â·ÂµÂ»Ã˜ÃÂ³Â²Â¿Ã‚Ã–Ã€Âª
 	std::vector<Pose2d> poseRes;
 
 	DetePose(frame, poseRes);
@@ -33,138 +33,140 @@ int PoseDete::GetFace(cv::Mat &frame, std::vector<float> &facescope, bool &faces
 	cv::putText(frame, ":(" + std::to_string(temp.rightdown.x) + "," + std::to_string(temp.rightdown.y) + ")", temp.rightdown, cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
 	//ShowZuoBiao(poseRes);
 	int zuobiao4_id = PanDuanTaiShou(frame, poseRes);
-	//std::cout << "zuobiao4_id" << zuobiao4_id<<"size:"<< poseRes.size() << std::endl;
-	  //¸³ÖµÊı×é
-	if (zuobiao4_id != -1)
+	std::cout << "zuobiao4_id" << zuobiao4_id<<"size:"<< poseRes.size() << std::endl;
+	  //Â¸Â³Ã–ÂµÃŠÃ½Ã—Ã©
+	if (zuobiao4_id % 4 == 0)//ä¸å¤Ÿå®Œå–„ æ— æ³•æ‘’å¼ƒ10ä½é•¿çš„ä¹±ç ï¼Œ
 	{
-		facescopeIsEmpty = false;//Êı×é·Ç¿Õ
-		GetFaceScope(zuobiao4_id, poseRes, facescope);
+		facescopeIsEmpty = false;//ÃŠÃ½Ã—Ã©Â·Ã‡Â¿Ã•
+		std::vector<float> facescope_temp;
+		GetFaceScope(zuobiao4_id, poseRes, facescope_temp, frame);
+		facescope = facescope_temp;
 	}
 	else
 	{
-		facescopeIsEmpty = true;//Êı×é¿Õ
+		facescopeIsEmpty = true;//ÃŠÃ½Ã—Ã©Â¿Ã•
 	}
 
-	poseRes.clear();//Çå¿ÕÊı×é
+	poseRes.clear();//Ã‡Ã¥Â¿Ã•ÃŠÃ½Ã—Ã©
 	return 0;
 }
 
-void PoseDete::DrawPoint(cv::Mat & image, std::vector<Pose2d>& poseKeypoints) {
+void PoseDete::DrawPoint(cv::Mat& image, std::vector<Pose2d>& poseKeypoints) {
 	for (size_t i = 0; i < poseKeypoints.size(); ++i) {
-		if (!Pose2dIsEmpty(poseKeypoints[i]))//µã·Ç¿Õ
+		if (!Pose2dIsEmpty(poseKeypoints[i]))//ÂµÃ£Â·Ã‡Â¿Ã•
 		{
-			circle(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), 3, cv::Scalar(255, 0, 0), -1);//»­³öµã
+			circle(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), 3, cv::Scalar(255, 0, 0), -1);//Â»Â­Â³Ã¶ÂµÃ£
 		}
 		
 	}
 	for (size_t i = 0; i < poseKeypoints.size(); i += 25)
 	{
 		    //0-1
-		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 1]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 1]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), cv::Point2d(poseKeypoints[i + 1].x, poseKeypoints[i + 1].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		
 			//0-15
-		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 15]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 15]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), cv::Point2d(poseKeypoints[i + 15].x, poseKeypoints[i + 15].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//0-16
-		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 15]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i]) && !Pose2dIsEmpty(poseKeypoints[i + 15]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i].x, poseKeypoints[i].y), cv::Point2d(poseKeypoints[i + 16].x, poseKeypoints[i + 16].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//14-13
-		if (!Pose2dIsEmpty(poseKeypoints[i+14]) && !Pose2dIsEmpty(poseKeypoints[i + 13]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+14]) && !Pose2dIsEmpty(poseKeypoints[i + 13]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Point2d(poseKeypoints[i + 13].x, poseKeypoints[i + 13].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//15-17
-		if (!Pose2dIsEmpty(poseKeypoints[i+15]) && !Pose2dIsEmpty(poseKeypoints[i + 17]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+15]) && !Pose2dIsEmpty(poseKeypoints[i + 17]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 15].x, poseKeypoints[i + 15].y), cv::Point2d(poseKeypoints[i + 17].x, poseKeypoints[i + 17].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//16-18
-		if (!Pose2dIsEmpty(poseKeypoints[i + 16]) && !Pose2dIsEmpty(poseKeypoints[i + 18]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 16]) && !Pose2dIsEmpty(poseKeypoints[i + 18]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 16].x, poseKeypoints[i + 16].y), cv::Point2d(poseKeypoints[i + 18].x, poseKeypoints[i + 18].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//1-2
-		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 2]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 2]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i+1].x, poseKeypoints[i+1].y), cv::Point2d(poseKeypoints[i + 2].x, poseKeypoints[i + 2].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//1-5
-		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 5]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 5]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i+1].x, poseKeypoints[i+1].y), cv::Point2d(poseKeypoints[i + 5].x, poseKeypoints[i + 5].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//2-3
-		if (!Pose2dIsEmpty(poseKeypoints[i+2]) && !Pose2dIsEmpty(poseKeypoints[i + 3]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+2]) && !Pose2dIsEmpty(poseKeypoints[i + 3]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i+2].x, poseKeypoints[i+2].y), cv::Point2d(poseKeypoints[i + 3].x, poseKeypoints[i + 3].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//3-4
-		if (!Pose2dIsEmpty(poseKeypoints[i+3]) && !Pose2dIsEmpty(poseKeypoints[i + 4]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+3]) && !Pose2dIsEmpty(poseKeypoints[i + 4]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i+3].x, poseKeypoints[i+3].y), cv::Point2d(poseKeypoints[i + 4].x, poseKeypoints[i + 4].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//5-6
-		if (!Pose2dIsEmpty(poseKeypoints[i+5]) && !Pose2dIsEmpty(poseKeypoints[i + 6]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+5]) && !Pose2dIsEmpty(poseKeypoints[i + 6]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i+5].x, poseKeypoints[i+5].y), cv::Point2d(poseKeypoints[i + 6].x, poseKeypoints[i + 6].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//6-7
-		if (!Pose2dIsEmpty(poseKeypoints[i+6]) && !Pose2dIsEmpty(poseKeypoints[i + 7]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+6]) && !Pose2dIsEmpty(poseKeypoints[i + 7]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 6].x, poseKeypoints[i + 6].y), cv::Point2d(poseKeypoints[i + 7].x, poseKeypoints[i + 7].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//1-8
-		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 8]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+1]) && !Pose2dIsEmpty(poseKeypoints[i + 8]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 1].x, poseKeypoints[i + 1].y), cv::Point2d(poseKeypoints[i + 8].x, poseKeypoints[i + 8].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//10-11
-		if (!Pose2dIsEmpty(poseKeypoints[i + 10]) && !Pose2dIsEmpty(poseKeypoints[i + 11]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 10]) && !Pose2dIsEmpty(poseKeypoints[i + 11]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 10].x, poseKeypoints[i + 10].y), cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//8-9
-		if (!Pose2dIsEmpty(poseKeypoints[i+8]) && !Pose2dIsEmpty(poseKeypoints[i + 9]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+8]) && !Pose2dIsEmpty(poseKeypoints[i + 9]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 8].x, poseKeypoints[i + 8].y), cv::Point2d(poseKeypoints[i + 9].x, poseKeypoints[i + 9].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//8-12
-		if (!Pose2dIsEmpty(poseKeypoints[i + 8]) && !Pose2dIsEmpty(poseKeypoints[i + 12]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 8]) && !Pose2dIsEmpty(poseKeypoints[i + 12]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 8].x, poseKeypoints[i + 8].y), cv::Point2d(poseKeypoints[i + 12].x, poseKeypoints[i + 12].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//9-10
-		if (!Pose2dIsEmpty(poseKeypoints[i+9]) && !Pose2dIsEmpty(poseKeypoints[i + 10]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+9]) && !Pose2dIsEmpty(poseKeypoints[i + 10]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 9].x, poseKeypoints[i + 9].y), cv::Point2d(poseKeypoints[i + 10].x, poseKeypoints[i + 10].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 			//12-13
-		if (!Pose2dIsEmpty(poseKeypoints[i+12]) && !Pose2dIsEmpty(poseKeypoints[i + 13]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i+12]) && !Pose2dIsEmpty(poseKeypoints[i + 13]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 12].x, poseKeypoints[i + 12].y), cv::Point2d(poseKeypoints[i + 13].x, poseKeypoints[i + 13].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 
-	    //×ó½Å
+	    //Ã—Ã³Â½Ã…
 		//14-21
-		if (!Pose2dIsEmpty(poseKeypoints[i + 14]) && !Pose2dIsEmpty(poseKeypoints[i + 21]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 14]) && !Pose2dIsEmpty(poseKeypoints[i + 21]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Point2d(poseKeypoints[i + 21].x, poseKeypoints[i + 21].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//21-19
-		if (!Pose2dIsEmpty(poseKeypoints[i + 19]) && !Pose2dIsEmpty(poseKeypoints[i + 21]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 19]) && !Pose2dIsEmpty(poseKeypoints[i + 21]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 19].x, poseKeypoints[i + 19].y), cv::Point2d(poseKeypoints[i + 21].x, poseKeypoints[i + 21].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//19-20
-		if (!Pose2dIsEmpty(poseKeypoints[i + 19]) && !Pose2dIsEmpty(poseKeypoints[i + 20]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 19]) && !Pose2dIsEmpty(poseKeypoints[i + 20]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 19].x, poseKeypoints[i + 19].y), cv::Point2d(poseKeypoints[i + 20].x, poseKeypoints[i + 20].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//20-14
-		if (!Pose2dIsEmpty(poseKeypoints[i + 14]) && !Pose2dIsEmpty(poseKeypoints[i + 20]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 14]) && !Pose2dIsEmpty(poseKeypoints[i + 20]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 14].x, poseKeypoints[i + 14].y), cv::Point2d(poseKeypoints[i + 20].x, poseKeypoints[i + 20].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
-		//ÓÒ½Å
+		//Ã“Ã’Â½Ã…
 		//11-23
-		if (!Pose2dIsEmpty(poseKeypoints[i + 11]) && !Pose2dIsEmpty(poseKeypoints[i + 23]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 11]) && !Pose2dIsEmpty(poseKeypoints[i + 23]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Point2d(poseKeypoints[i + 23].x, poseKeypoints[i + 23].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//23-22
-		if (!Pose2dIsEmpty(poseKeypoints[i + 22]) && !Pose2dIsEmpty(poseKeypoints[i + 23]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 22]) && !Pose2dIsEmpty(poseKeypoints[i + 23]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 22].x, poseKeypoints[i + 22].y), cv::Point2d(poseKeypoints[i + 23].x, poseKeypoints[i + 23].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//22-24
-		if (!Pose2dIsEmpty(poseKeypoints[i + 22]) && !Pose2dIsEmpty(poseKeypoints[i + 24]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 22]) && !Pose2dIsEmpty(poseKeypoints[i + 24]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 22].x, poseKeypoints[i + 22].y), cv::Point2d(poseKeypoints[i + 24].x, poseKeypoints[i + 24].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 		//24-11
-		if (!Pose2dIsEmpty(poseKeypoints[i + 11]) && !Pose2dIsEmpty(poseKeypoints[i + 24]))/*µ±Á½¸öµã¶¼´æÔÚÊ±,»­³öÖ®¼äµÄÁ¬Ïß*/ {
+		if (!Pose2dIsEmpty(poseKeypoints[i + 11]) && !Pose2dIsEmpty(poseKeypoints[i + 24]))/*ÂµÂ±ÃÂ½Â¸Ã¶ÂµÃ£Â¶Â¼Â´Ã¦Ã”ÃšÃŠÂ±,Â»Â­Â³Ã¶Ã–Â®Â¼Ã¤ÂµÃ„ÃÂ¬ÃÃŸ*/ {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Point2d(poseKeypoints[i + 24].x, poseKeypoints[i + 24].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 	}
@@ -179,17 +181,19 @@ bool PoseDete::Pose2dIsEmpty(Pose2d poseKeypoint)
 		return false;
 	
 }
-void PoseDete::GetFaceScope(int zuobiao4_id, std::vector<Pose2d>& poseKeypoints, std::vector<float> &facescope)
+void PoseDete::GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints, std::vector<float> &facescope,cv::Mat  test_image)
 {
 	
 	if (!Pose2dIsEmpty(poseKeypoints[zuobiao4_id + 13]) && !Pose2dIsEmpty(poseKeypoints[zuobiao4_id - 3]) && !Pose2dIsEmpty(poseKeypoints[zuobiao4_id + 14]))
 	{
 		
-		facescope.push_back(poseKeypoints[zuobiao4_id + 13].x);
-		facescope.push_back(poseKeypoints[zuobiao4_id + 14].x);
-		facescope.push_back(2 * poseKeypoints[zuobiao4_id + 13].y - poseKeypoints[zuobiao4_id - 3].y);
-		facescope.push_back(2 * poseKeypoints[zuobiao4_id + 14].y - poseKeypoints[zuobiao4_id - 3].y);
-
+		facescope.push_back(poseKeypoints[zuobiao4_id + 13].x);//leftup.x
+		facescope.push_back(2 * poseKeypoints[zuobiao4_id + 13].y - poseKeypoints[zuobiao4_id - 3].y);//leftup.y
+		facescope.push_back(poseKeypoints[zuobiao4_id + 14].x);//rightdown.x
+		facescope.push_back(poseKeypoints[zuobiao4_id - 3].y);//rightdown.y
+        //testing draw face scope
+		cv::rectangle(test_image, cv::Point2f(facescope[0], facescope[1]), cv::Point2f(facescope[2], facescope[3]), cv::Scalar(255, 0, 0), 1, 1, 0);
+		SetElbow4PointScope(cv::Point2f(10,10), cv::Point2f(200, 300));
 		////show
 		/*int index = 0;
 		for each (auto& var in facescope)
@@ -198,30 +202,36 @@ void PoseDete::GetFaceScope(int zuobiao4_id, std::vector<Pose2d>& poseKeypoints,
 			index = index + 1;
 		}*/
 		std::cout << "in scope" << std::endl;
+		return;
+	}
+	else
+	{
+		std::cout << "incomplete coordinate" << std::endl;
+		return;
 	}
 }
-int PoseDete::PanDuanTaiShou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints)//ÅĞ¶Ï4ºÅµãÎ»ÓÚÄ³¸öÇøÓò ·µ»Ø4ºÅµãÏÂ±ê
+int PoseDete::PanDuanTaiShou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints)//Ã…ÃÂ¶Ã4ÂºÃ…ÂµÃ£ÃÂ»Ã“ÃšÃ„Â³Â¸Ã¶Ã‡Ã¸Ã“Ã² Â·ÂµÂ»Ã˜4ÂºÃ…ÂµÃ£ÃÃ‚Â±Ãª
 {
 	
-	//testing start »­³öÖ¸¶¨ÇøÓò
+	//testing start Â»Â­Â³Ã¶Ã–Â¸Â¶Â¨Ã‡Ã¸Ã“Ã²
 	cv::rectangle(image, temp.leftup,temp.rightdown, cv::Scalar(255, 0, 0), 1, 1, 0);
 	//testing end
-	for (int i = 4; i < poseKeypoints.size(); i = i + 25)//±éÀúÍ¼ÏñÖĞËùÓĞµÄÈË
+	for (size_t i = 4; i < poseKeypoints.size(); i = i + 25)//Â±Ã©Ã€ÃºÃÂ¼ÃÃ±Ã–ÃÃ‹Ã¹Ã“ÃÂµÃ„ÃˆÃ‹
 	{
-		if (!Pose2dIsEmpty(poseKeypoints[i]))//4ºÅµã´æÔÚ
+		if (!Pose2dIsEmpty(poseKeypoints[i]))//4ÂºÃ…ÂµÃ£Â´Ã¦Ã”Ãš
 		{
-			if (InScope(poseKeypoints[i]))//ÅĞ¶Ï4ºÅµãÎ»ÓÚÖ¸¶¨ÇøÓò
+			if (InScope(poseKeypoints[i]))//Ã…ÃÂ¶Ã4ÂºÃ…ÂµÃ£ÃÂ»Ã“ÃšÃ–Â¸Â¶Â¨Ã‡Ã¸Ã“Ã²
 			{
-				return i;//4ºÅµãÎ»ÓÚÖ¸¶¨ÇøÓò
+				return int(i);//4ÂºÃ…ÂµÃ£ÃÂ»Ã“ÃšÃ–Â¸Â¶Â¨Ã‡Ã¸Ã“Ã²
 			}
 		}
 		else if ((25 + i) > poseKeypoints.size())
 		{
-			return -1;//Ñ°±éÊı×é£¬ËùÓĞÈË¶¼Ã»Ì§ÊÖ
+			return -1;//Ã‘Â°Â±Ã©ÃŠÃ½Ã—Ã©Â£Â¬Ã‹Ã¹Ã“ÃÃˆÃ‹Â¶Â¼ÃƒÂ»ÃŒÂ§ÃŠÃ–
 		}
 	}
 }
-/*½«datumsPtrÖĞµÄµã×ª´æµ½poseKeypoints*/
+/*Â½Â«datumsPtrÃ–ÃÂµÃ„ÂµÃ£Ã—ÂªÂ´Ã¦ÂµÂ½poseKeypoints*/
 void PoseDete::TransKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr, std::vector<Pose2d>& poseKeypoints)
 {
 	try
@@ -239,15 +249,15 @@ void PoseDete::TransKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<
 				pose2d.score = pointsResult[i + 2];
 				poseKeypoints.push_back(pose2d);
 			}
-			/*Êä³ö×ø±êµãÏà¹ØĞÅÏ¢*/
+			/*ÃŠÃ¤Â³Ã¶Ã—Ã¸Â±ÃªÂµÃ£ÃÃ Â¹Ã˜ÃÃ…ÃÂ¢*/
 			/*testing*/
 			//std::cout <<"mVolume="<< datumsPtr->at(0)->poseKeypoints.getVolume() << std::endl;
 			//std::cout << "NumberDimensions=" << datumsPtr->at(0)->poseKeypoints.getNumberDimensions()<< std::endl;
-			//std::cout << "DatumID:" << datumsPtr->at(0)->id << std::endl;//³ÌĞòÔËĞĞÆÚ¼äÒ»Ö±µİÔö ¿ÉÒÔÀí½âÎªÖ¡Êı£¨Ã¿Ö¡¶ÔÓ¦Ò»¸öDatum£©
+			//std::cout << "DatumID:" << datumsPtr->at(0)->id << std::endl;//Â³ÃŒÃÃ²Ã”Ã‹ÃÃÃ†ÃšÂ¼Ã¤Ã’Â»Ã–Â±ÂµÃÃ”Ã¶ Â¿Ã‰Ã’Ã”Ã€Ã­Â½Ã¢ÃÂªÃ–Â¡ÃŠÃ½Â£Â¨ÃƒÂ¿Ã–Â¡Â¶Ã”Ã“Â¦Ã’Â»Â¸Ã¶DatumÂ£Â©
 			//std::cout << "DatumsubId:" << datumsPtr->at(0)->subId << std::endl;
 			//std::cout << "DatumsubIdMax:" << datumsPtr->at(0)->subIdMax << std::endl;
-			//cv::imshow("Datum storage 3dMat output:", datumsPtr->at(0)->cvInputData);//´æ´¢ÊäÈëÍ¼ÏñµÄMat
-			//cv::imshow("Datum storage Mat output:", datumsPtr->at(0)->cvOutputData);//´æ´¢´øÓĞ¹Ç÷ÀÁ¬ÏßµÄMat
+			//cv::imshow("Datum storage 3dMat output:", datumsPtr->at(0)->cvInputData);//Â´Ã¦Â´Â¢ÃŠÃ¤ÃˆÃ«ÃÂ¼ÃÃ±ÂµÃ„Mat
+			//cv::imshow("Datum storage Mat output:", datumsPtr->at(0)->cvOutputData);//Â´Ã¦Â´Â¢Â´Ã¸Ã“ÃÂ¹Ã‡Ã·Ã€ÃÂ¬ÃÃŸÂµÃ„Mat
 			//panduantaishou(datumsPtr->at(0)->cvInputData, poseKeypoints);
 		}
 		else
@@ -413,7 +423,7 @@ void PoseDete::DetecImages(std::string imagepath)
 void PoseDete::DetecVedio(std::string vediopath)
 {
 	cv::VideoCapture cap;
-    cap.open(vediopath); //´ò¿ªÊÓÆµ,ÒÔÉÏÁ½¾äµÈ¼ÛÓÚVideoCapture cap("E://2.avi");
+    cap.open(vediopath); //Â´Ã²Â¿ÂªÃŠÃ“Ã†Âµ,Ã’Ã”Ã‰ÃÃÂ½Â¾Ã¤ÂµÃˆÂ¼Ã›Ã“ÃšVideoCapture cap("E://2.avi");
 
 	if (!cap.isOpened()) {
 		return;
@@ -461,7 +471,7 @@ void PoseDete::SetElbow4PointScope(cv::Point2f leftup, cv::Point2f rightdown)
 	temp.rightdown = rightdown;
 }
 
-int PoseDete::DetePose(cv::Mat &frame, std::vector<Pose2d>& poseKeypoints) {
+int PoseDete::DetePose(cv::Mat& frame, std::vector<Pose2d>& poseKeypoints) {
 	try
 	{
 		auto datumProcessed = opWrapper.emplaceAndPop(frame);
@@ -482,11 +492,11 @@ int PoseDete::DetePose(cv::Mat &frame, std::vector<Pose2d>& poseKeypoints) {
 void PoseDete::ShowZuoBiao(std::vector<Pose2d> poseKeypoints)
 {
 	int index = 0;
-	for each (auto& var in poseKeypoints)
+	/*for each (auto& var in poseKeypoints)
 	{
 		std::cout <<"index:"<<index <<"x = "<<var.x << ";y = "<<var.y << std::endl;
 		index = index + 1;
-	}
+	}*/
 }
 
 bool PoseDete::InScope(Pose2d Point)
