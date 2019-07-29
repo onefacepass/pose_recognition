@@ -93,7 +93,7 @@ public:
 	facescope[3] = 18y + (18y-1y) 1为脖颈部
 	Attention 当左耳，右耳，脖颈三个点全部存在时，才能获取轮廓
 	*/
-	void GetFaceScope(int zuobiao4_id, std::vector<Pose2d>& poseKeypoints, std::vector<float> &facescope);
+	void GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints, std::vector<float> &facescope, cv::Mat  test_image);
 	/*
 	在图像上骨骼位置处输出 index:x,y 的信息，index为序号
 	*/
