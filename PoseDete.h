@@ -1,6 +1,9 @@
 #pragma once
 #include <openpose/headers.hpp>
 #include <vector>
+
+//#define POSEDEBUG
+
 struct Pose2d
 {
 	float x;
@@ -16,134 +19,138 @@ public:
 	
 
 	/*
-	   @·µ»ØÖµ ÎŞÒâÒå
-	   ¸÷²ÎÊıÍ¨¹ı ÒıÓÃ ·µ»ØÖµ
-	   1.frame ÊäÈëÍ¼Ïñ
-	   2.facescope ·µ»ØÖµÁ³²¿Êı¾İ
+	   @è¿”å›å€¼
+	   0  æ­£å¸¸ç»“æŸ
+	   -1 imageä¸­æ²¡æœ‰äºº
+	   -2 æŠ¬æ‰‹äº†ï¼Œä½†å¤´éƒ¨æ•°æ®ä¸å®Œæ•´
+	   -3 æ²¡æœ‰æŠ¬æ‰‹æˆ–æŠ¬æ‰‹äº†ä¸åœ¨æŒ‡å®šèŒƒå›´
+
+	   å„å‚æ•°é€šè¿‡ å¼•ç”¨ è¿”å›å€¼
+	   1.frame è¾“å…¥å›¾åƒ
+	   2.facescope è¿”å›å€¼è„¸éƒ¨æ•°æ®
 		   facescope[0] = leftup.x
 		   facescope[1] = leftup.y
 		   facescope[2] = rightdown.x
 		   facescope[3] = rightdown.y
-	   3.facescopeIsEmpty facescopeÊı×éÊÇ·ñÎª¿Õ
-	   true ¿Õ
-	   false ·Ç¿Õ
-	   4.Attention ÄÚ²¿º¬ÓĞÏÔÊ¾ÅĞ¶ÏÇøÓò×ø±êµÄ²âÊÔº¯Êı
+	   3.facescopeIsEmpty facescopeæ•°ç»„æ˜¯å¦ä¸ºç©º
+	   true ç©º
+	   false éç©º
+	   4.Attention å†…éƒ¨å«æœ‰æ˜¾ç¤ºåˆ¤æ–­åŒºåŸŸåæ ‡çš„æµ‹è¯•å‡½æ•°
 
 	*/
-	int GetFace(cv::Mat &frame, std::vector<float> &facescope, bool &facescopeIsEmpty);
-
-		
-public:
-	/*Ïß³Ì*/
-	op::Wrapper opWrapper{ op::ThreadManagerMode::Asynchronous };
+	int DetectPose(cv::Mat &frame, int *&  _rect);
 	/*
-	³õÊ¼»¯º¯Êı
-	1.ÅĞ¶Ï·¶Î§µÄ¶¨Òå
-	2.OpenposeÏà¹ØÏß³ÌµÈ³õÊ¼»¯
+	åˆå§‹åŒ–å‡½æ•°
+	1.åˆ¤æ–­èŒƒå›´çš„å®šä¹‰
+	2.Openposeç›¸å…³çº¿ç¨‹ç­‰åˆå§‹åŒ–
 	*/
 	void Init();
 	/*
-	½«datumsPtrÖĞµÄµã×ª´æµ½poseKeypoints,½«×ø±êÊı¾İ×ª»»³ÉÈİÒ×½ÓÊÜµÄ¸ñÊ½
-	poseKeypoints °üº¬ËùÓĞÈËµÄ¹Ç÷ÀĞÅÏ¢ 25¸öÎªÒ»¸öÈË
-	[0]-[24] µÚÒ»¸öÈË
-	[25]-[49]µÚ¶ş¸öÈË
+	è®¾ç½®æ‰‹è‡‚4å·å…³é”®ç‚¹åœ¨å±å¹•ä¸Šçš„æœ‰æ•ˆé™è½èŒƒå›´
+	leftup è¾“å…¥çš„å·¦ä¸Šæ–¹çš„ç‚¹
+	rightdown è¾“å…¥çš„å³ä¸‹æ–¹çš„ç‚¹
+	è‹¥æ— è®¾ç½®ï¼Œåˆ™ä¸ºé»˜è®¤å€¼(å…·ä½“å¯å‚è§Init())
+	*/
+	void SetElbow4PointScope(cv::Point2f leftup, cv::Point2f rightdown);
+		
+private:
+	/*çº¿ç¨‹*/
+	op::Wrapper opWrapper{ op::ThreadManagerMode::Asynchronous };
+	
+	/*
+	å°†datumsPträ¸­çš„ç‚¹è½¬å­˜åˆ°poseKeypoints,å°†åæ ‡æ•°æ®è½¬æ¢æˆå®¹æ˜“æ¥å—çš„æ ¼å¼
+	poseKeypoints åŒ…å«æ‰€æœ‰äººçš„éª¨éª¼ä¿¡æ¯ 25ä¸ªä¸ºä¸€ä¸ªäºº
+	[0]-[24] ç¬¬ä¸€ä¸ªäºº
+	[25]-[49]ç¬¬äºŒä¸ªäºº
 	...
 	*/
 	void TransKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr, std::vector<Pose2d>& poseKeypoints);
 	/*
-	OpenposeÈ«¾ÖºêµÄµÄÊ¹ÓÃ£¬¸ù¾İÈ«¾ÖºêµÄ¶¨Òåµ÷ÓÃÏà¹Øº¯Êı
+	Openposeå…¨å±€å®çš„çš„ä½¿ç”¨ï¼Œæ ¹æ®å…¨å±€å®çš„å®šä¹‰è°ƒç”¨ç›¸å…³å‡½æ•°
 	*/
 	void configureWrapper(op::Wrapper& opWrapper);
 	/*
-	@·µ»ØÖµ ÅĞ¶ÏÌ§ÊÖtureºó£¬4ºÅµãÔÚÊı×éÖĞÏÂ±ê
-	º¯Êı¹¦ÄÜ ÅĞ¶ÏÌ§ÊÖ¶¯×÷ 
-	image ÊäÈëÍ¼Ïñ ÒıÓÃ
-	poseKeypoints °üº¬ËùÓĞÈËµÄ¹Ç÷ÀĞÅÏ¢ 25¸öÎªÒ»¸öÈË
-	[0]-[24] µÚÒ»¸öÈË
-	[25]-[49]µÚ¶ş¸öÈË
+	@è¿”å›å€¼ åˆ¤æ–­æŠ¬æ‰‹tureåï¼Œ4å·ç‚¹åœ¨æ•°ç»„ä¸­ä¸‹æ ‡
+	å‡½æ•°åŠŸèƒ½ åˆ¤æ–­æŠ¬æ‰‹åŠ¨ä½œ 
+	image è¾“å…¥å›¾åƒ å¼•ç”¨
+	poseKeypoints åŒ…å«æ‰€æœ‰äººçš„éª¨éª¼ä¿¡æ¯ 25ä¸ªä¸ºä¸€ä¸ªäºº
+	[0]-[24] ç¬¬ä¸€ä¸ªäºº
+	[25]-[49]ç¬¬äºŒä¸ªäºº
 	...
 
-	Attention ÄÚ²¿º¬ÓĞ»­³ö4ºÅµã½µÂä·¶Î§µÄµÄº¯Êı
+	Attention å†…éƒ¨å«æœ‰ç”»å‡º4å·ç‚¹é™è½èŒƒå›´çš„çš„å‡½æ•°
 	*/
 	int PanDuanTaiShou(cv::Mat & image, std::vector<Pose2d>& poseKeypoints);
-	/*ÅĞ¶Ï×ø±êÊÇ·ñÎª¿Õ
-	ture ¿Õ
-	false ·Ç¿Õ
+	/*åˆ¤æ–­åæ ‡æ˜¯å¦ä¸ºç©º
+	ture ç©º
+	false éç©º
 	*/
 	bool Pose2dIsEmpty(Pose2d poseKeypoint);
 	/*
-	Ìí¼ÓµãÖ®¼äµÄÁ¬Ïß¹¦ÄÜ
-	1.»­³öËùÓĞ·Ç¿Õµã
-	2.°´Ò»¶¨¹æÔò»­³öµãÖ®¼äµÄÁ¬Ïß ÈËÓëÈËÖ®¼ä²»»¥Á¬
-	image ÊäÈëÍ¼Ïñ
-	poseKeypoints °üº¬ËùÓĞÈËµÄ¹Ç÷ÀĞÅÏ¢ 25¸öÎªÒ»¸öÈË
-	[0]-[24] µÚÒ»¸öÈË
-	[25]-[49]µÚ¶ş¸öÈË
+	æ·»åŠ ç‚¹ä¹‹é—´çš„è¿çº¿åŠŸèƒ½
+	1.ç”»å‡ºæ‰€æœ‰éç©ºç‚¹
+	2.æŒ‰ä¸€å®šè§„åˆ™ç”»å‡ºç‚¹ä¹‹é—´çš„è¿çº¿ äººä¸äººä¹‹é—´ä¸äº’è¿
+	image è¾“å…¥å›¾åƒ
+	poseKeypoints åŒ…å«æ‰€æœ‰äººçš„éª¨éª¼ä¿¡æ¯ 25ä¸ªä¸ºä¸€ä¸ªäºº
+	[0]-[24] ç¬¬ä¸€ä¸ªäºº
+	[25]-[49]ç¬¬äºŒä¸ªäºº
 	...
 	*/
 	void DrawPoint(cv::Mat & image, std::vector<Pose2d>& poseKeypoints);
 	/*
-	»ñµÃÁ³²¿Î»ÖÃÂÖÀª
-	zuobiao4_id ÊäÈëÖµ£¬PanDuanTaiShouº¯Êı·µ»ØÖµ£¬ÅĞ¶ÏÌ§ÊÖtrueµÄ4ºÅµãÔÚÊı×éÖĞÏÂ±ê
-	poseKeypoints °üº¬ËùÓĞÈËµÄ¹Ç÷ÀĞÅÏ¢ 25¸öÎªÒ»¸ö¼ä¸ô
-	facescope ·µ»ØµÄÁ³²¿ÂÖÀª
-	facescope[0] = 17ºÅµã£¨×ó¶ú£©µÄx
-	facescope[1] = 17y + (17y-1y) 1Îª²±¾±²¿
-	facescope[2] = 18x 18ÎªÓÒ¶ú
-	facescope[3] = 18y + (18y-1y) 1Îª²±¾±²¿
-	Attention µ±×ó¶ú£¬ÓÒ¶ú£¬²±¾±Èı¸öµãÈ«²¿´æÔÚÊ±£¬²ÅÄÜ»ñÈ¡ÂÖÀª
+	è·å¾—è„¸éƒ¨ä½ç½®è½®å»“
+	zuobiao4_id è¾“å…¥å€¼ï¼ŒPanDuanTaiShouå‡½æ•°è¿”å›å€¼ï¼Œåˆ¤æ–­æŠ¬æ‰‹trueçš„4å·ç‚¹åœ¨æ•°ç»„ä¸­ä¸‹æ ‡
+	poseKeypoints åŒ…å«æ‰€æœ‰äººçš„éª¨éª¼ä¿¡æ¯ 25ä¸ªä¸ºä¸€ä¸ªé—´éš”
+	facescope è¿”å›çš„è„¸éƒ¨è½®å»“
+	facescope[0] = 17å·ç‚¹ï¼ˆå·¦è€³ï¼‰çš„x
+	facescope[1] = 17y + (17y-1y) 1ä¸ºè„–é¢ˆéƒ¨
+	facescope[2] = 18x 18ä¸ºå³è€³
+	facescope[3] = 18y + (18y-1y) 1ä¸ºè„–é¢ˆéƒ¨
+	Attention å½“å·¦è€³ï¼Œå³è€³ï¼Œè„–é¢ˆä¸‰ä¸ªç‚¹å…¨éƒ¨å­˜åœ¨æ—¶ï¼Œæ‰èƒ½è·å–è½®å»“
 	*/
 	void GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints, std::vector<float> &facescope, cv::Mat  test_image);
 	/*
-	ÔÚÍ¼ÏñÉÏ¹Ç÷ÀÎ»ÖÃ´¦Êä³ö index:x,y µÄĞÅÏ¢£¬indexÎªĞòºÅ
+	åœ¨å›¾åƒä¸Šéª¨éª¼ä½ç½®å¤„è¾“å‡º index:x,y çš„ä¿¡æ¯ï¼Œindexä¸ºåºå·
 	*/
 	void ShowPointIndexInImage(cv::Mat & image, std::vector<Pose2d>& poseKeypoints);
+	
 	/*
-	ÉèÖÃÊÖ±Û4ºÅ¹Ø¼üµãÔÚÆÁÄ»ÉÏµÄÓĞĞ§½µÂä·¶Î§
-	leftup ÊäÈëµÄ×óÉÏ·½µÄµã
-	rightdown ÊäÈëµÄÓÒÏÂ·½µÄµã
-	*/
-	void SetElbow4PointScope(cv::Point2f leftup, cv::Point2f rightdown);
-	/*
-	Ì½²âµ¥ÕÅÍ¼Ïñ¹Ç÷ÀĞÅÏ¢£¬½«¹Ç÷À»­ÓëÍ¼ÏñÉÏ£¬²¢Êä³öµ½ÆÁÄ»
-	imagepath Í¼ÏñÂ·¾¶ Ê¹ÓÃË«Ğ±¸Ü
+	æ¢æµ‹å•å¼ å›¾åƒéª¨éª¼ä¿¡æ¯ï¼Œå°†éª¨éª¼ç”»ä¸å›¾åƒä¸Šï¼Œå¹¶è¾“å‡ºåˆ°å±å¹•
+	imagepath å›¾åƒè·¯å¾„ ä½¿ç”¨åŒæ–œæ 
 	*/
 	void DetecImage(std::string imagepath);
 	/*
-	Ì½²âÎÄ¼ş¼ĞÏÂ¶à¸öÍ¼Ïñ¹Ç÷ÀĞÅÏ¢,½«¹Ç÷À»­ÓëÍ¼ÏñÉÏ£¬²¢Êä³öµ½ÆÁÄ»
-	imagepath Í¼ÏñÂ·¾¶ Ê¹ÓÃË«Ğ±¸Ü
+	æ¢æµ‹æ–‡ä»¶å¤¹ä¸‹å¤šä¸ªå›¾åƒéª¨éª¼ä¿¡æ¯,å°†éª¨éª¼ç”»ä¸å›¾åƒä¸Šï¼Œå¹¶è¾“å‡ºåˆ°å±å¹•
+	imagepath å›¾åƒè·¯å¾„ ä½¿ç”¨åŒæ–œæ 
 	*/
 	void DetecImages(std::string imagepath);
 	/*
-	Ì½²âÊÓÆµ¹Ç÷ÀĞÅÏ¢,½«¹Ç÷À»­ÓëÍ¼ÏñÉÏ£¬²¢Êä³öµ½ÆÁÄ»
-	imagepath Í¼ÏñÂ·¾¶ Ê¹ÓÃË«Ğ±¸Ü
+	æ¢æµ‹è§†é¢‘éª¨éª¼ä¿¡æ¯,å°†éª¨éª¼ç”»ä¸å›¾åƒä¸Šï¼Œå¹¶è¾“å‡ºåˆ°å±å¹•
+	imagepath å›¾åƒè·¯å¾„ ä½¿ç”¨åŒæ–œæ 
 	*/
 	void DetecVedio(std::string vediopath);
 	/*
-	Ì½²âÉãÏñÍ·ÊµÊ±¹Ç÷ÀĞÅÏ¢,½«¹Ç÷À»­ÓëÍ¼ÏñÉÏ£¬²¢Êä³öµ½ÆÁÄ»
+	æ¢æµ‹æ‘„åƒå¤´å®æ—¶éª¨éª¼ä¿¡æ¯,å°†éª¨éª¼ç”»ä¸å›¾åƒä¸Šï¼Œå¹¶è¾“å‡ºåˆ°å±å¹•
 	*/
 	void DetecRealTimeCamera();
 	/*
-	ÊäÈëÍ¼Ïñ£¬·µ»Ø¹Ç÷À×ø±ê
-	frame ÊäÈëÍ¼Ïñ ÒıÓÃ
-	poseKeypoints ·µ»ØµÄ¹Ç÷À×ø±ê ÒıÓÃ
+	è¾“å…¥å›¾åƒï¼Œè¿”å›éª¨éª¼åæ ‡
+	frame è¾“å…¥å›¾åƒ å¼•ç”¨
+	poseKeypoints è¿”å›çš„éª¨éª¼åæ ‡ å¼•ç”¨
 	*/
 	int DetePose(cv::Mat &frame, std::vector<Pose2d>& poseKeypoints);
+	
 	/*
-	½«¹Ç÷À×ø±ê°´ index£ºx,yÊä³öµ½ÃüÁîĞĞ´°¿Ú
-	*/
-	void ShowZuoBiao(std::vector<Pose2d> poseKeypoints);
-	/*
-	ÅĞ¶ÏÊäÈëµãÊÇ·ñÎ»ÓÚÇøÓòÄÚ£¬tempÄÚ
-	ture Î»ÓÚ
-	false ²»Î»ÓÚ
+	åˆ¤æ–­è¾“å…¥ç‚¹æ˜¯å¦ä½äºåŒºåŸŸå†…ï¼Œtempå†…
+	ture ä½äº
+	false ä¸ä½äº
 	*/
 	bool InScope(Pose2d Point);
 
-	struct elbow4pointscope //ÊÖ±Û4ºÅ¹Ø¼üµãÔÚÆÁÄ»ÉÏµÄÓĞĞ§½µÂä·¶Î§
+	struct elbow4pointscope //æ‰‹è‡‚4å·å…³é”®ç‚¹åœ¨å±å¹•ä¸Šçš„æœ‰æ•ˆé™è½èŒƒå›´
 	{
-		cv::Point2f leftup;//×óÉÏµã 
-		cv::Point2f rightdown;//ÓÒÏÂµã
+		cv::Point2f leftup;//å·¦ä¸Šç‚¹ 
+		cv::Point2f rightdown;//å³ä¸‹ç‚¹
 	}temp;
 
 
