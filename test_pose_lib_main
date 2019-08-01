@@ -3,17 +3,8 @@
 int main(int argc, char *argv[])
 {
 	PoseDete poseDete;
-	poseDete.Init();
-	/*
-
-	int facescope[4];
-	bool empty;
-
-	auto imageToProcess = cv::imread(imagePath);
-	poseDete.GetFace(imageToProcess, facescope, empty);
-	cv::imshow("test", imageToProcess);
-	cv::waitKey(33);*/
-
+	poseDete.Init();//初始化 必须有
+	poseDete.SetElbow4PointScope(cv::Point2f(50, 50), cv::Point2f(150, 150)); //修改落点区域  有默认值
 
 
 
@@ -22,20 +13,32 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	cv::Mat frame;
-	std::vector<float> facescope;
-	bool empty;
-	int * rect = nullptr;
+	
+	int * rect = NULL;
+
 	while (cap.isOpened()) {
 		cap >> frame;
-		poseDete.DetectPose(frame, rect);
+		poseDete.DetectPose(frame, rect);//探测
 
+
+		if (rect != NULL)
+		{
+			cv::rectangle(frame, cv::Point2f(*rect, *(rect + 1)), cv::Point2f(*(rect + 2), *(rect + 3)), cv::Scalar(255, 0, 0), 1, 1, 0);//画出得到的脸部框
+		}
+
+
+		//test end 
 		cv::imshow("test", frame);
 		cv::waitKey(33);
-		facescope.clear();
+		
+
 	}
-	//poseDete.detec_real_time_camera();
-	//	poseDete.detec_vedio("C:\\Users\\有对象真好\\Desktop\\openpose-master\\examples\\media\\video.avi");
-	//	poseDete.detec_images("C:\\Users\\有对象真好\\Desktop\\openpose-master\\examples\\media");
-	//	poseDete.detec_image("C:\\Users\\有对象真好\\Desktop\\imagedir\\00002.jpg");
+	if (rect != NULL)
+	{
+		std::cout << "delete rect;" << std::endl;
+		delete rect;
+	}
+
+	
 	return 0;
 }
