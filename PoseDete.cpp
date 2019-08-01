@@ -1,4 +1,4 @@
-﻿#include "PoseDete.h"
+#include "PoseDete.h"
 #include <openpose/flags.hpp>
 PoseDete::PoseDete()
 {
@@ -35,15 +35,24 @@ int PoseDete::DetectPose(cv::Mat &frame, int *& _rect) {
 	{
 		return -1;
 	}
-	DrawPoint(frame, poseRes);
+#ifdef POSEDEBUG
 
+	DrawPoint(frame, poseRes);
 	//show temp in picture
-	cv::putText(frame,":(" + std::to_string(temp.leftup.x) + "," + std::to_string(temp.leftup.y) + ")", temp.leftup, cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
+	cv::putText(frame, ":(" + std::to_string(temp.leftup.x) + "," + std::to_string(temp.leftup.y) + ")", temp.leftup, cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
 	cv::putText(frame, ":(" + std::to_string(temp.rightdown.x) + "," + std::to_string(temp.rightdown.y) + ")", temp.rightdown, cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
-	//ShowZuoBiao(poseRes);
+	
+#endif // DEBUG
+
+	
+
 	int zuobiao4_id = PanDuanTaiShou(frame, poseRes);
-	//std::cout << zuobiao4_id<<"-----"<< poseRes.size() << std::endl;
+
+	
+#ifdef POSEDEBUG
+	std::cout << zuobiao4_id << "-----" << poseRes.size() << std::endl;
 	std::cout << PanDuanTaiShou(frame, poseRes) << "-----" << poseRes.size() << std::endl;
+#endif // DEBUG
 	  //¸³ÖµÊý×é
 	if (zuobiao4_id % 4 == 0)//不够完善 无法摒弃10位长的乱码，
 	{
@@ -60,8 +69,10 @@ int PoseDete::DetectPose(cv::Mat &frame, int *& _rect) {
 		else
 			return -2;
 		
+#ifdef POSEDEBUG
 		//test * tect
-		//cv::rectangle(frame, cv::Point2f(*rect, *(rect + 1)), cv::Point2f(*(rect + 2), *(rect + 3)), cv::Scalar(255, 0, 0), 1, 1, 0);
+		cv::rectangle(frame, cv::Point2f(*_rect, *(_rect + 1)), cv::Point2f(*(_rect + 2), *(_rect + 3)), cv::Scalar(255, 0, 0), 1, 1, 0);
+#endif // DEBUG
 	}
 	else
 	{
@@ -192,7 +203,9 @@ void PoseDete::DrawPoint(cv::Mat& image, std::vector<Pose2d>& poseKeypoints) {
 			cv::line(image, cv::Point2d(poseKeypoints[i + 11].x, poseKeypoints[i + 11].y), cv::Point2d(poseKeypoints[i + 24].x, poseKeypoints[i + 24].y), cv::Scalar(0, 255, 255), 3, 8, 0);
 		}
 	}
+#ifdef POSEDEBUG
 	ShowPointIndexInImage(image, poseKeypoints);
+#endif // DEBUG
 }
 
 bool PoseDete::Pose2dIsEmpty(Pose2d poseKeypoint)
@@ -213,28 +226,21 @@ void PoseDete::GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints
 		facescope.push_back(2 * poseKeypoints[zuobiao4_id + 13].y - poseKeypoints[zuobiao4_id - 3].y);//leftup.y
 		facescope.push_back(poseKeypoints[zuobiao4_id + 14].x);//rightdown.x
 		facescope.push_back(poseKeypoints[zuobiao4_id - 3].y);//rightdown.y
-        //testing draw face scope
-		//cv::rectangle(test_image, cv::Point2f(facescope[0], facescope[1]), cv::Point2f(facescope[2], facescope[3]), cv::Scalar(255, 0, 0), 1, 1, 0);
-		//test end
-		SetElbow4PointScope(cv::Point2f(10,10), cv::Point2f(200, 300));
-		////show
-		/*int index = 0;
-		for each (auto& var in facescope)
-		{
-			std::cout <<"index :"<<index<< "facescope"<<var << std::endl;
-			index = index + 1;
-		}*/
-		for (auto i: facescope)
-		{
-			std::cout << i;
-		}
-		std::cout << std::endl;
-		std::cout << "in scope" << std::endl;
+        
+	
+#ifdef POSEDEBUG
+		std::cout << "SUCCESS！！" << std::endl;
+#endif // 
+
+		
 		return;
 	}
 	else
 	{
-		std::cout << "incomplete coordinate" << std::endl;
+#ifdef POSEDEBUG
+		std::cout << "incomplete FACE coordinate" << std::endl;
+#endif // 
+		
 		return;
 	}
 }
@@ -412,7 +418,11 @@ void PoseDete::DetecImage(std::string imagepath)
 		if (datumProcessed != nullptr)
 		{
 			TransKeypoints(datumProcessed, poseRes);
+#ifdef POSEDEBUG
 			DrawPoint(imageToProcess, poseRes);
+#endif // POSEDEBUG
+
+			
 
 			cv::imshow("test", imageToProcess); 
 			cv::waitKey(3300000);
@@ -438,10 +448,15 @@ void PoseDete::DetecImages(std::string imagepath)
 		if (datumProcessed != nullptr)
 		{
 			TransKeypoints(datumProcessed, poseRes);
+#ifdef POSEDEBUG
 			DrawPoint(imageToProcess, poseRes);
-
 			cv::imshow("test", imageToProcess);
 			cv::waitKey(33);
+#endif // POSEDEBUG
+
+			
+
+			
 			poseRes.clear();
 		}
 		else
@@ -466,10 +481,14 @@ void PoseDete::DetecVedio(std::string vediopath)
 		if (!frame.empty())
 		{
 			DetePose(frame, poseRes);
+#ifdef POSEDEBUG
 			DrawPoint(frame, poseRes);
-
 			cv::imshow("test", frame);
 			cv::waitKey(33);
+#endif // POSEDEBUG
+
+		
+
 			poseRes.clear();
 		}
 	}
@@ -487,10 +506,14 @@ void PoseDete::DetecRealTimeCamera()
 	while (cap.isOpened()) {
 		cap >> frame;
 		DetePose(frame, poseRes);
+#ifdef POSEDEBUG
 		DrawPoint(frame, poseRes);
 
 		cv::imshow("test", frame);
 		cv::waitKey(33);
+#endif // POSEDEBUG
+
+		
 		poseRes.clear();
 	}
 }
@@ -519,15 +542,6 @@ int PoseDete::DetePose(cv::Mat& frame, std::vector<Pose2d>& poseKeypoints) {
 	}
 }
 
-void PoseDete::ShowZuoBiao(std::vector<Pose2d> poseKeypoints)
-{
-	int index = 0;
-	/*for each (auto& var in poseKeypoints)
-	{
-		std::cout <<"index:"<<index <<"x = "<<var.x << ";y = "<<var.y << std::endl;
-		index = index + 1;
-	}*/
-}
 
 bool PoseDete::InScope(Pose2d Point)
 {
