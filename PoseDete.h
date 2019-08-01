@@ -16,7 +16,12 @@ public:
 	
 
 	/*
-	   @返回值 无意义
+	   @返回值
+	   0  正常结束
+	   -1 image中没有人
+	   -2 抬手了，但头部数据不完整
+	   -3 没有抬手或抬手了不在指定范围
+
 	   各参数通过 引用 返回值
 	   1.frame 输入图像
 	   2.facescope 返回值脸部数据
@@ -30,18 +35,25 @@ public:
 	   4.Attention 内部含有显示判断区域坐标的测试函数
 
 	*/
-	int GetFace(cv::Mat &frame, std::vector<float> &facescope, bool &facescopeIsEmpty);
-
-		
-public:
-	/*线程*/
-	op::Wrapper opWrapper{ op::ThreadManagerMode::Asynchronous };
+	int DetectPose(cv::Mat &frame, int *&  rect);
 	/*
 	初始化函数
 	1.判断范围的定义
 	2.Openpose相关线程等初始化
 	*/
 	void Init();
+	/*
+	设置手臂4号关键点在屏幕上的有效降落范围
+	leftup 输入的左上方的点
+	rightdown 输入的右下方的点
+	若无设置，则为默认值(具体可参见Init())
+	*/
+	void SetElbow4PointScope(cv::Point2f leftup, cv::Point2f rightdown);
+		
+private:
+	/*线程*/
+	op::Wrapper opWrapper{ op::ThreadManagerMode::Asynchronous };
+	
 	/*
 	将datumsPtr中的点转存到poseKeypoints,将坐标数据转换成容易接受的格式
 	poseKeypoints 包含所有人的骨骼信息 25个为一个人
@@ -98,12 +110,7 @@ public:
 	在图像上骨骼位置处输出 index:x,y 的信息，index为序号
 	*/
 	void ShowPointIndexInImage(cv::Mat & image, std::vector<Pose2d>& poseKeypoints);
-	/*
-	设置手臂4号关键点在屏幕上的有效降落范围
-	leftup 输入的左上方的点
-	rightdown 输入的右下方的点
-	*/
-	void SetElbow4PointScope(cv::Point2f leftup, cv::Point2f rightdown);
+	
 	/*
 	探测单张图像骨骼信息，将骨骼画与图像上，并输出到屏幕
 	imagepath 图像路径 使用双斜杠

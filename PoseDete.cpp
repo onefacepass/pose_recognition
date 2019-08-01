@@ -22,10 +22,19 @@ void PoseDete::Init() {
 	opWrapper.start();
 }
 
-int PoseDete::GetFace(cv::Mat& frame, std::vector<float> &facescope, bool &facescopeIsEmpty) {//Ì½²âµ¥ÕÅÍ¼Ïñ ·µ»ØÁ³²¿ÂÖÀª
+int PoseDete::DetectPose(cv::Mat &frame, int *& _rect) {
 	std::vector<Pose2d> poseRes;
+	if (_rect){
+		delete[] _rect;
+		_rect = nullptr;
+	}
 
 	DetePose(frame, poseRes);
+	//判断poseRes
+	if (poseRes.empty())
+	{
+		return -1;
+	}
 	DrawPoint(frame, poseRes);
 
 	//show temp in picture
@@ -33,18 +42,31 @@ int PoseDete::GetFace(cv::Mat& frame, std::vector<float> &facescope, bool &faces
 	cv::putText(frame, ":(" + std::to_string(temp.rightdown.x) + "," + std::to_string(temp.rightdown.y) + ")", temp.rightdown, cv::FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255));
 	//ShowZuoBiao(poseRes);
 	int zuobiao4_id = PanDuanTaiShou(frame, poseRes);
-	std::cout << "zuobiao4_id" << zuobiao4_id<<"size:"<< poseRes.size() << std::endl;
+	//std::cout << zuobiao4_id<<"-----"<< poseRes.size() << std::endl;
+	std::cout << PanDuanTaiShou(frame, poseRes) << "-----" << poseRes.size() << std::endl;
 	  //¸³ÖµÊý×é
 	if (zuobiao4_id % 4 == 0)//不够完善 无法摒弃10位长的乱码，
 	{
-		facescopeIsEmpty = false;//Êý×é·Ç¿Õ
+		_rect = new int[4]();
 		std::vector<float> facescope_temp;
 		GetFaceScope(zuobiao4_id, poseRes, facescope_temp, frame);
-		facescope = facescope_temp;
+		if (!facescope_temp.empty())
+		{
+			*_rect = facescope_temp[0];
+			*(_rect + 1) = facescope_temp[1];
+			*(_rect + 2) = facescope_temp[2];
+			*(_rect + 3) = facescope_temp[3];
+		}
+		else
+			return -2;
+		
+		//test * tect
+		//cv::rectangle(frame, cv::Point2f(*rect, *(rect + 1)), cv::Point2f(*(rect + 2), *(rect + 3)), cv::Scalar(255, 0, 0), 1, 1, 0);
 	}
 	else
 	{
-		facescopeIsEmpty = true;//Êý×é¿Õ
+		_rect = nullptr;
+		return -3;
 	}
 
 	poseRes.clear();//Çå¿ÕÊý×é
@@ -192,7 +214,8 @@ void PoseDete::GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints
 		facescope.push_back(poseKeypoints[zuobiao4_id + 14].x);//rightdown.x
 		facescope.push_back(poseKeypoints[zuobiao4_id - 3].y);//rightdown.y
         //testing draw face scope
-		cv::rectangle(test_image, cv::Point2f(facescope[0], facescope[1]), cv::Point2f(facescope[2], facescope[3]), cv::Scalar(255, 0, 0), 1, 1, 0);
+		//cv::rectangle(test_image, cv::Point2f(facescope[0], facescope[1]), cv::Point2f(facescope[2], facescope[3]), cv::Scalar(255, 0, 0), 1, 1, 0);
+		//test end
 		SetElbow4PointScope(cv::Point2f(10,10), cv::Point2f(200, 300));
 		////show
 		/*int index = 0;
@@ -201,6 +224,11 @@ void PoseDete::GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints
 			std::cout <<"index :"<<index<< "facescope"<<var << std::endl;
 			index = index + 1;
 		}*/
+		for (auto i: facescope)
+		{
+			std::cout << i;
+		}
+		std::cout << std::endl;
 		std::cout << "in scope" << std::endl;
 		return;
 	}
@@ -210,24 +238,26 @@ void PoseDete::GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints
 		return;
 	}
 }
-int PoseDete::PanDuanTaiShou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints)//ÅÐ¶Ï4ºÅµãÎ»ÓÚÄ³¸öÇøÓò ·µ»Ø4ºÅµãÏÂ±ê
+int PoseDete::PanDuanTaiShou(cv::Mat & image,std::vector<Pose2d>& poseKeypoints)//
 {
 	
-	//testing start »­³öÖ¸¶¨ÇøÓò
+	//testing start 
 	cv::rectangle(image, temp.leftup,temp.rightdown, cv::Scalar(255, 0, 0), 1, 1, 0);
 	//testing end
-	for (size_t i = 4; i < poseKeypoints.size(); i = i + 25)//±éÀúÍ¼ÏñÖÐËùÓÐµÄÈË
+	for (size_t i = 4; i < poseKeypoints.size(); i = i + 25)//
 	{
-		if (!Pose2dIsEmpty(poseKeypoints[i]))//4ºÅµã´æÔÚ
+		if (!Pose2dIsEmpty(poseKeypoints[i]))//
 		{
-			if (InScope(poseKeypoints[i]))//ÅÐ¶Ï4ºÅµãÎ»ÓÚÖ¸¶¨ÇøÓò
+			if (InScope(poseKeypoints[i]))//
 			{
-				return int(i);//4ºÅµãÎ»ÓÚÖ¸¶¨ÇøÓò
+				return int(i);//存在在范围内
 			}
+			else
+				return -1;//存在但不在范围内
 		}
 		else if ((25 + i) > poseKeypoints.size())
 		{
-			return -1;//Ñ°±éÊý×é£¬ËùÓÐÈË¶¼Ã»Ì§ÊÖ
+			return -1;//不存在
 		}
 	}
 }
