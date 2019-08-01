@@ -1,9 +1,6 @@
 #pragma once
 #include <openpose/headers.hpp>
 #include <vector>
-
-//#define POSEDEBUG
-
 struct Pose2d
 {
 	float x;
@@ -20,22 +17,22 @@ public:
 
 	/*
 	   @返回值
-	   0  正常结束
+	   0  脸部数据完整且抬手，功能全部正常
 	   -1 image中没有人
 	   -2 抬手了，但头部数据不完整
 	   -3 没有抬手或抬手了不在指定范围
 
 	   各参数通过 引用 返回值
 	   1.frame 输入图像
-	   2.facescope 返回值脸部数据
-		   facescope[0] = leftup.x
-		   facescope[1] = leftup.y
-		   facescope[2] = rightdown.x
-		   facescope[3] = rightdown.y
-	   3.facescopeIsEmpty facescope数组是否为空
-	   true 空
-	   false 非空
-	   4.Attention 内部含有显示判断区域坐标的测试函数
+	   2._rect 存储脸部坐标的指针
+	   _rect[0],_rect[1]: (x1,y1)
+		 _rect[2],_rect[3]: (x2,y2)
+		(x1,y1)─────┐
+		 │              │
+	     │              │
+		 │              │
+		 └──────(x2,y2) 
+	  
 
 	*/
 	int DetectPose(cv::Mat &frame, int *&  _rect);

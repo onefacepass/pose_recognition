@@ -45,12 +45,11 @@ int PoseDete::DetectPose(cv::Mat &frame, int *& _rect) {
 #endif // DEBUG
 
 	
-
+	//ShowZuoBiao(poseRes);
 	int zuobiao4_id = PanDuanTaiShou(frame, poseRes);
-
-	
+	//std::cout << zuobiao4_id<<"-----"<< poseRes.size() << std::endl;
 #ifdef POSEDEBUG
-	std::cout << zuobiao4_id << "-----" << poseRes.size() << std::endl;
+
 	std::cout << PanDuanTaiShou(frame, poseRes) << "-----" << poseRes.size() << std::endl;
 #endif // DEBUG
 	  //¸³ÖµÊý×é
@@ -228,19 +227,13 @@ void PoseDete::GetFaceScope(int& zuobiao4_id, std::vector<Pose2d>& poseKeypoints
 		facescope.push_back(poseKeypoints[zuobiao4_id - 3].y);//rightdown.y
         
 	
-#ifdef POSEDEBUG
-		std::cout << "SUCCESS！！" << std::endl;
-#endif // 
 
-		
+		std::cout << "in scope" << std::endl;
 		return;
 	}
 	else
 	{
-#ifdef POSEDEBUG
-		std::cout << "incomplete FACE coordinate" << std::endl;
-#endif // 
-		
+		std::cout << "incomplete coordinate" << std::endl;
 		return;
 	}
 }
